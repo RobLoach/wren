@@ -138,6 +138,20 @@ negative to count backwards from the end of the string.
 It is a runtime error if `search` is not a string or `start` is not an integer
 index within the string's byte length.
 
+### **lastIndexOf**(search)
+
+Returns the index of the last occurance of `search` in the string, or `-1` if
+`search` was not found.
+
+It is a runtime error if `search` is not a string.
+
+### **lastIndexOf**(search, start)
+
+Returns the index of the last occurance of `search` in the string or `-1` if
+`search` was not found, starting a byte offset `start`.
+
+It is a runtime error if `search` is not a string.
+
 ### **iterate**(iterator), **iteratorValue**(iterator)
 
 Implements the [iterator protocol][] for iterating over the *code points* in the
