@@ -19,13 +19,19 @@ Like other scripting languages, Wren has a single numeric type:
 double-precision floating point. Number literals look like you expect coming
 from other languages:
 
-    :::wren
-    0
-    1234
-    -5678
-    3.14159
-    1.0
-    -12.34
+
+<pre class="snippet">
+0
+1234
+-5678
+3.14159
+1.0
+-12.34
+0.0314159e02
+0.0314159e+02
+314.159e-02
+0xcaffe2
+</pre>
 
 Numbers are instances of the [Num][] class.
 
@@ -40,39 +46,61 @@ though.)
 
 String literals are surrounded in double quotes:
 
-    :::wren
-    "hi there"
+<pre class="snippet">
+"hi there"
+</pre>
+
+They can also span multiple lines. When they do, the newline character within
+the string will always be `\n` (`\r\n` is normalized to `\n`). 
+
+<pre class="snippet">
+"hi
+there,
+again"
+</pre>
+
+### Escaping
 
 A handful of escape characters are supported:
 
-    :::wren
-    "\0" // The NUL byte: 0.
-    "\"" // A double quote character.
-    "\\" // A backslash.
-    "\%" // A percent sign.
-    "\a" // Alarm beep. (Who uses this?)
-    "\b" // Backspace.
-    "\f" // Formfeed.
-    "\n" // Newline.
-    "\r" // Carriage return.
-    "\t" // Tab.
-    "\v" // Vertical tab.
+<pre class="snippet">
+"\0" // The NUL byte: 0.
+"\"" // A double quote character.
+"\\" // A backslash.
+"\%" // A percent sign.
+"\a" // Alarm beep. (Who uses this?)
+"\b" // Backspace.
+"\e" // ESC character.
+"\f" // Formfeed.
+"\n" // Newline.
+"\r" // Carriage return.
+"\t" // Tab.
+"\v" // Vertical tab.
+
+
+"\x48"        // Unencoded byte     (2 hex digits)
+"\u0041"      // Unicode code point (4 hex digits)
+"\U0001F64A"  // Unicode code point (8 hex digits)
+</pre>
+
+A `\x` followed by two hex digits specifies a single unencoded byte:
+
+<pre class="snippet">
+System.print("\x48\x69\x2e") //> Hi.
+</pre>
 
 A `\u` followed by four hex digits can be used to specify a Unicode code point:
 
-    :::wren
-    System.print("\u0041\u0b83\u00DE") //> AஃÞ
+<pre class="snippet">
+System.print("\u0041\u0b83\u00DE") //> AஃÞ
+</pre>
 
 A capital `\U` followed by *eight* hex digits allows Unicode code points outside
 of the basic multilingual plane, like all-important emoji:
 
-    :::wren
-    System.print("\U0001F64A\U0001F680") //> 🙊🚀
-
-A `\x` followed by two hex digits specifies a single unencoded byte:
-
-    :::wren
-    System.print("\x48\x69\x2e") //> Hi.
+<pre class="snippet">
+System.print("\U0001F64A\U0001F680") //> 🙊🚀
+</pre>
 
 Strings are instances of class [String][].
 
@@ -85,16 +113,75 @@ followed by a parenthesized expression, the expression is evaluated. The
 resulting object's `toString` method is called and the result is inserted in the
 string:
 
-    :::wren
-    System.print("Math %(3 + 4 * 5) is fun!") //> Math 23 is fun!
+<pre class="snippet">
+System.print("Math %(3 + 4 * 5) is fun!") //> Math 23 is fun!
+</pre>
 
 Arbitrarily complex expressions are allowed inside the parentheses:
 
-    :::wren
-    System.print("wow %((1..3).map {|n| n * n}.join())") //> wow 149
+<pre class="snippet">
+System.print("wow %((1..3).map {|n| n * n}.join())") //> wow 149
+</pre>
 
 An interpolated expression can even contain a string literal which in turn has
 its own nested interpolations, but doing that gets unreadable pretty quickly.
+
+### Raw strings
+
+A string literal can also be created using triple quotes `"""` which is
+parsed as a raw string. A raw string is no different
+from any other string, it's just parsed in a different way.
+
+**Raw strings do not process escapes and do not apply any interpolation**.
+
+<pre class="snippet">
+"""hi there"""
+</pre>
+
+When a raw string spans multiple lines and a triple quote is on it's own line,
+any whitespace on that line will be ignored. This means the opening and closing
+lines are not counted as part of the string when the triple quotes are separate lines,
+as long as they only contain whitespace (spaces + tabs).
+
+<pre class="snippet">
+  """
+    Hello world
+  """
+</pre>
+
+The resulting value in the string above has no newlines or trailing whitespace. 
+Note the spaces in front of the Hello are preserved. 
+
+<pre class="snippet">
+    Hello world
+</pre>
+
+A raw string will be parsed exactly as is in the file, unmodified.
+This means it can contain quotes, invalid syntax, other data formats 
+and so on without being modified by Wren.
+
+<pre class="snippet">
+"""
+  {
+    "hello": "wren",
+    "from" : "json"
+  }
+"""
+</pre>
+
+One more example, embedding wren code inside a string safely.
+
+<pre class="snippet">
+"""
+A markdown string with embedded wren code example.
+
+    class Example {
+      construct code() {
+        //
+      }
+    }
+"""
+</pre>
 
 ## Ranges
 
@@ -104,25 +191,32 @@ implements the `..` and `...` [operators][] to create them:
 
 [operators]: method-calls.html#operators
 
-    :::wren
-    3..8
+<pre class="snippet">
+3..8
+</pre>
 
 This creates a range from three to eight, including eight itself. If you want a
 half-inclusive range, use `...`:
 
-    :::wren
-    4...6
+<pre class="snippet">
+4...6
+</pre>
 
 This creates a range from four to six *not* including six itself. Ranges are
 commonly used for [iterating](control-flow.html#for-statements) over a
 sequences of numbers, but are useful in other places too. You can pass them to
 a [list](lists.html)'s subscript operator to return a subset of the list, for
-example:
+example, or on a String, the substring in that range:
 
-    :::wren
-    var list = ["a", "b", "c", "d", "e"]
-    var slice = list[1..3]
-    System.print(slice) //> [b, c, d]
+<pre class="snippet">
+var list = ["a", "b", "c", "d", "e"]
+var slice = list[1..3]
+System.print(slice) //> [b, c, d]
+
+var string = "hello wren"
+var wren = string[-4..-1]
+System.print(wren) //> wren
+</pre>
 
 Their class is [Range][].
 

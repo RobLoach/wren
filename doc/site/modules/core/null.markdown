@@ -4,7 +4,8 @@
 
 ### **!** operator
 
-Returns `true`, since `null` is considered [false](../control-flow.html#truth).
+Returns `true`, since `null` is considered [false](../../control-flow.html#truth).
 
-    :::wren
-    System.print(!null) //> true
+<pre class="snippet">
+System.print(!null) //> true
+</pre>
