@@ -960,6 +960,27 @@ uint32_t wrenStringFind(ObjString* haystack, ObjString* needle, uint32_t start)
   return UINT32_MAX;
 }
 
+// Uses the Boyer-Moore-Horspool string matching algorithm.
+uint32_t wrenStringFindLast(ObjString* haystack, ObjString* needle, uint32_t start)
+{
+  // Edge case: An empty needle is always found.
+  if (needle->length == 0) return start;
+
+  // If the needle goes past the haystack, move the start to the end of the haystack.
+  if (start + needle->length > haystack->length)
+    start = haystack->length - needle->length;
+
+  for (uint32_t index = start; index >= 0; index--) {
+    uint32_t found = wrenStringFind(haystack, needle, index);
+    if (found != UINT32_MAX) {
+      return found;
+    }
+  }
+
+  // Not found.
+  return UINT32_MAX;
+}
+
 ObjUpvalue* wrenNewUpvalue(WrenVM* vm, Value* value)
 {
   ObjUpvalue* upvalue = ALLOCATE(vm, ObjUpvalue);

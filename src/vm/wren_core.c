@@ -1090,6 +1090,30 @@ DEF_PRIMITIVE(string_indexOf2)
   RETURN_NUM(index == UINT32_MAX ? -1 : (int)index);
 }
 
+DEF_PRIMITIVE(string_lastIndexOf1)
+{
+  if (!validateString(vm, args[1], "Argument")) return false;
+
+  ObjString* string = AS_STRING(args[0]);
+  ObjString* search = AS_STRING(args[1]);
+
+  uint32_t index = wrenStringFind(string, search, string->length - 1);
+  RETURN_NUM(index == UINT32_MAX ? -1 : (int)index);
+}
+
+DEF_PRIMITIVE(string_lastIndexOf2)
+{
+  if (!validateString(vm, args[1], "Argument")) return false;
+
+  ObjString* string = AS_STRING(args[0]);
+  ObjString* search = AS_STRING(args[1]);
+  uint32_t start = validateIndex(vm, args[2], string->length, "Start");
+  if (start == UINT32_MAX) return false;
+  
+  uint32_t index = wrenStringFind(string, search, start);
+  RETURN_NUM(index == UINT32_MAX ? -1 : (int)index);
+}
+
 DEF_PRIMITIVE(string_iterate)
 {
   ObjString* string = AS_STRING(args[0]);
@@ -1421,6 +1445,8 @@ void wrenInitializeCore(WrenVM* vm)
   PRIMITIVE(vm->stringClass, "endsWith(_)", string_endsWith);
   PRIMITIVE(vm->stringClass, "indexOf(_)", string_indexOf1);
   PRIMITIVE(vm->stringClass, "indexOf(_,_)", string_indexOf2);
+  PRIMITIVE(vm->stringClass, "lastIndexOf(_)", string_lastIndexOf1);
+  PRIMITIVE(vm->stringClass, "lastIndexOf(_,_)", string_lastIndexOf2);
   PRIMITIVE(vm->stringClass, "iterate(_)", string_iterate);
   PRIMITIVE(vm->stringClass, "iterateByte_(_)", string_iterateByte);
   PRIMITIVE(vm->stringClass, "iteratorValue(_)", string_iteratorValue);
